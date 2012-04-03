@@ -12,12 +12,15 @@
 <h1>命名さん beta</h1>
 <div class="description">
 <p>
-名字の画数を入れるとその名字に最適な画数を列挙します。
+名字の画数を入れるとその名字に最適な画数を列挙します。<br>
+※吉数はたまごクラブの赤ちゃんの名前に使える漢字辞典を参考にしてます。<br>
+※その内、名字を入れたら画数を取得するようにしたいです。。。<br>
 </p>
 </div>
-<form>
+<form class="well">
   <label>名字の1文字目の画数<input type="text" class="input-small" name="first" id="first"></label><br>
   <label>名字の2文字目の画数<input type="test" class="input-small" name="second"id="second"></label><br>
+  <label>基本的な画数だけで計算する<input type="checkbox" id="is_base_only" name="is_base_only" value=1> </label>
   <input type="button" class="btn btn-primary" id="submit" value="列挙する">
 </form>
 <div id="res">

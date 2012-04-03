@@ -79,27 +79,23 @@ function _point(kakusu, priority) {
        hankichi = [7,17,27,30,34,35,36,38,40,42,43,49,53,57,58]
        kyo = [2,4,9,10,12,14,19,20,22,26,28,46,50,54,55,56,59,60]
 */
-  
-
   _check(daikichi, kakusu, priority);
   _check(kichi, kakusu, priority);
   _check(hankichi, kakusu, priority);
   _check(kyo, kakusu, priority);
 }
 
-function _point_gogyo(first, second, third, fourth) {
-  if(third % 2 == 0) {
-    point = point + 10;
-    return "good";
-  } else {
+function _point_inyo(first, second, third, fourth) {
+  if(second % 2 == third % 2) {
     point = point * 0.8; 
-    return "bad";
+    return "×";
+  } else {
+    point = point + 10;
+    return "○";
   }
 }
 
-
-
-function _calc(first, second, third, fourth) {
+function _calc(first, second, third, fourth, is_base_only) {
   point = 0;
   tenkaku = parseInt( first )   + parseInt( second );
   jinkaku = parseInt( second )  + parseInt( third );
@@ -115,68 +111,59 @@ function _calc(first, second, third, fourth) {
   _point(chikaku,1);
   _point(gaikaku,1);
   _point(soukaku,1);
-  _point(syakai,2);
-  _point(fukukaku,2);
-  _point(katei,2);
+  inyo = '';
 
-  res.push(
-    {
-      "tenkaku" : {
-        "kakusu" : tenkaku, 
-        "hantei" : hantei(tenkaku)
-      },
-      "jinkaku" : {
-        "kakusu" : jinkaku, 
-        "hantei" : hantei(jinkaku)
-      },
-      "chikaku" : {
-        "kakusu" : chikaku, 
-        "hantei" : hantei(chikaku)
-      },
-      "gaikaku" : {
-        "kakusu" : gaikaku, 
-        "hantei" : hantei(gaikaku)
-      },
-      "soukaku" : {
-        "kakusu" : soukaku, 
-        "hantei" : hantei(soukaku)
-      },
-      "syakai"  : {
-        "kakusu" : syakai, 
-        "hantei" : hantei(syakai)
-      },
-      "katei"   : {
-        "kakusu" : katei, 
-        "hantei" : hantei(katei)
-      },
-      "third"   : {
-        "kakusu" : third, 
-        "hantei" : hantei(third)
-      },
-      "fourth"        : {
-        "kakusu" : fourth, 
-        "hantei" : hantei(fourth)
-      },
-      "fukukaku": {
-        "kakusu" : fukukaku, 
-        "hantei" : hantei(fukukaku)
-      },
-      "gogyo"   : _point_gogyo(first, second, third, fourth),
-      "point"   : point
-    }
-  );
-}
-
-function meimei(first, second) {
-  res = [];
-  
-  for(var i=1 ; i<19 ; i++) {
-    for(var j=1 ; j<19 ; j++) {
-      _calc(first, second, i, j);
-    }
+  if(!is_base_only) {
+    _point(syakai,2);
+    _point(fukukaku,2);
+    _point(katei,2);
+    inyo = _point_inyo(first, second, third, fourth);
   }
-  //res = res.sort_by { |val| -val['point'] }
-  return res;
+
+  return {
+    "tenkaku" : {
+      "kakusu" : tenkaku, 
+      "hantei" : hantei(tenkaku)
+    },
+    "jinkaku" : {
+      "kakusu" : jinkaku, 
+      "hantei" : hantei(jinkaku)
+    },
+    "chikaku" : {
+      "kakusu" : chikaku, 
+      "hantei" : hantei(chikaku)
+    },
+    "gaikaku" : {
+      "kakusu" : gaikaku, 
+      "hantei" : hantei(gaikaku)
+    },
+    "soukaku" : {
+      "kakusu" : soukaku, 
+      "hantei" : hantei(soukaku)
+    },
+    "syakai"  : {
+      "kakusu" : syakai, 
+      "hantei" : hantei(syakai)
+    },
+    "katei"   : {
+      "kakusu" : katei, 
+      "hantei" : hantei(katei)
+    },
+    "third"   : {
+      "kakusu" : third, 
+      "hantei" : hantei(third)
+    },
+    "fourth"        : {
+      "kakusu" : fourth, 
+      "hantei" : hantei(fourth)
+    },
+    "fukukaku": {
+      "kakusu" : fukukaku, 
+      "hantei" : hantei(fukukaku)
+    },
+    "inyo"   : inyo,
+    "point"   : point
+  };
 }
 
 function hyoji(point) {
@@ -191,7 +178,7 @@ function hyoji(point) {
   }
 }
 
-function fill(e) {
+function fill(e, is_base_only) {
   form = '<table class="table table-bordered">';
   form += "<thead>";
   form += "<th>天格</th>";
@@ -199,12 +186,16 @@ function fill(e) {
   form += "<th>地格</th>";
   form += "<th>外格</th>";
   form += "<th>総画</th>";
-  form += "<th>社会運</th>";
-  form += "<th>家庭運</th>";
-  form += "<th>伏運</th>";
+
+  if(!is_base_only) {  
+    form += "<th>社会運</th>";
+    form += "<th>家庭運</th>";
+    form += "<th>伏運</th>";
+    form += "<th>陰陽</th>";
+  }
+
   form += "<th>3番目の画数</th>";
   form += "<th>4番目の画数</th>";
-  form += "<th>陰陽</th>";
   form += "<th>ポイント</th>";
   form += "</thead><tbody>";
 
@@ -215,25 +206,39 @@ function fill(e) {
     form += "<td>" + e[i]["chikaku"]["kakusu"]  + " 画:" +  hyoji(e[i]["chikaku"]["hantei"] ) + "</td>";
     form += "<td>" + e[i]["gaikaku"]["kakusu"]  + " 画:" +  hyoji(e[i]["gaikaku"]["hantei"] ) + "</td>";
     form += "<td>" + e[i]["soukaku"]["kakusu"]  + " 画:" +  hyoji(e[i]["soukaku"]["hantei"] ) + "</td>";
-    form += "<td>" + e[i]["syakai"]["kakusu"]   + " 画:" +  hyoji(e[i]["syakai"]["hantei"]  ) + "</td>";
-    form += "<td>" + e[i]["katei"]["kakusu"]    + " 画:" +  hyoji(e[i]["katei"]["hantei"]   ) + "</td>";
-    form += "<td>" + e[i]["fukukaku"]["kakusu"] + " 画:" +  hyoji(e[i]["fukukaku"]["hantei"]) + "</td>";
+
+    if(!is_base_only) {  
+      form += "<td>" + e[i]["syakai"]["kakusu"]   + " 画:" +  hyoji(e[i]["syakai"]["hantei"]  ) + "</td>";
+      form += "<td>" + e[i]["katei"]["kakusu"]    + " 画:" +  hyoji(e[i]["katei"]["hantei"]   ) + "</td>";
+      form += "<td>" + e[i]["fukukaku"]["kakusu"] + " 画:" +  hyoji(e[i]["fukukaku"]["hantei"]) + "</td>";
+      form += "<td>" + e[i]["inyo"]              + "</td>";
+    }
+
     form += "<td>" + e[i]["third"]["kakusu"]    + " 画</td>";
     form += "<td>" + e[i]["fourth"]["kakusu"]   + " 画</td>";
-    form += "<td>" + e[i]["gogyo"]              + "</td>";
     form += "<td>" + e[i]["point"]              + "</td>";
     form += "</tr>";
   }
   form += "</tbody></table>";
-  $("#res").append(form);
+  $("#res").empty().append(form);
+}
 
+function meimei(first, second, is_base_only) {
+  res = [];
+  
+  for(var i=1 ; i<19 ; i++) {
+    for(var j=1 ; j<19 ; j++) {
+      res.push( _calc(first, second, i, j, is_base_only) );
+    }
+  }
+  res.arsort("point");
+  return res;
 }
 
 
 $(document).ready(function(){
   $("#submit").click(function(){
-    var res = meimei($("#first").val(), $("#second").val());
-    res.arsort("point");
-    fill(res);
+    var res = meimei($("#first").val(), $("#second").val(), $("#is_base_only").attr('checked'));
+    fill(res, $("#is_base_only").attr('checked'));
   });
 });
